@@ -4,13 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OMDB API with XHR</title>
+    <link rel="stylesheet" href="./css/sytle.css">
 </head>
 <body>
     <h1>Buscar películas</h1>
     <input type="text" id="movieTitle" placeholder="Ingresa el título de la película">
     <button id="searchButton">Buscar</button>
-    <div id="movieResult"></div>
+    <button id="clearButton">Borrar</button>
 
-    <script src="app.js"></script>
+    <div id="filters">
+        <button id="filterToggleButton">Filtrar</button>
+        <div id="filterOptions" style="display: none;">
+            <label for="decadeFilter">Año:</label>
+            <select id="decadeFilter">
+                <option value="">Todas la decadas</option>
+            </select>
+            
+            <label for="genreFilter">Género:</label>
+            <select id="genreFilter">
+                <option value="">Todos los género</option>
+            </select>
+            
+            <button id="applyFilterButton">Aplicar Filtros</button>
+        </div>
+    </div>
+    <!-- <div id="movieResult"></div> -->
+    <div id="moviesContainer"></div>
+    <div id="movieDetails"></div>
+
+    <script src="XHRprueba.js"></script>
 </body>
 </html>
