@@ -9,6 +9,15 @@ body {
     min-height: 100vh;
 }
 
+header {
+    padding-left: 45%;
+    padding-right: 45%;
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
 .nav input {
     flex: 1;
     padding: 10px;
@@ -20,7 +29,7 @@ body {
 .nav button {
     padding: 10px 20px;
     font-size: 16px;
-    background-color: #3498db;
+    background-color: gray;
     color: white;
     border: none;
     border-radius: 5px;
@@ -29,7 +38,7 @@ body {
 }
 
 .nav button:hover {
-    background-color: #2980b9;
+    background-color: gainsboro;
 }
 
 
@@ -53,14 +62,14 @@ input, select, button {
     border: 1px solid #ccc;
 }
 
-button {
-    background-color: #3498db;
+.filtrar {
+    background-color: gray;
     color: white;
     cursor: pointer;
 }
 
-button:hover {
-    background-color: #2980b9;
+.filtrar:hover {
+    background-color: gainsboro;
 }
 
 select {
@@ -132,9 +141,9 @@ select {
     margin: 5px 0;
 }
 
-button:focus {
+/* button:focus {
     outline: none;
-}
+} */
 
 input {
     width: 300px;

@@ -1,21 +1,43 @@
 const apiKey = 'a834ae02';
+let currentPage = 1;
 
-const searchButton = document.getElementById('searchButton');
-const applyFilterButton = document.getElementById('applyFilterButton');
+const botonBuscar = document.getElementById('botonBuscar');
+const filtrar = document.getElementById('filtrar');
 const clearButton = document.getElementById('clearButton');
+const botoncargar = document.getElementById('botoncargar');
 const movieTitleInput = document.getElementById('movieTitle');
 const genreFilter = document.getElementById('generoFilter');
 const moviesContainer = document.getElementById('moviesContainer');
 
-searchButton.addEventListener('click', () => buscarPeliculas(movieTitleInput.value));
-applyFilterButton.addEventListener('click', () => buscarPeliculas('', genreFilter.value));
-clearButton.addEventListener('click', () => {
-    movieTitleInput.value = '';
-    moviesContainer.innerHTML = '';
+botonBuscar.addEventListener('click', () => {
+    currentPage = 1;
+    buscarPeliculas(movieTitleInput.value);
 });
 
-function buscarPeliculas(titulo = '', genero = '') {
-    const url = `https://www.omdbapi.com/?apikey=${apiKey}&s=${encodeURIComponent(titulo || 'movie')}&type=movie`;
+filtrar.addEventListener('click', () => {
+    currentPage = 1;
+    buscarPorGenero(genreFilter.value);
+});
+
+clearButton.addEventListener('click', () => {
+    movieTitleInput.value = '';
+    genreFilter.value = '';
+    moviesContainer.innerHTML = '';
+    botoncargar.style.display = 'none';
+});
+
+botoncargar.addEventListener('click', () => {
+    currentPage++;
+    buscarPorGenero(genreFilter.value)
+});
+
+// Función para buscar películas por título
+function buscarPeliculas(titulo = '') {
+    let url = `https://www.omdbapi.com/?apikey=${apiKey}&type=movie`;
+
+    if (titulo) {
+        url += `&s=${encodeURIComponent(titulo)}`;
+    }
 
     const xhr = new XMLHttpRequest();
     xhr.open('GET', url, true);
@@ -24,8 +46,8 @@ function buscarPeliculas(titulo = '', genero = '') {
             const respuesta = JSON.parse(xhr.responseText);
             if (respuesta.Response === 'True') {
                 let movies = respuesta.Search;
-                obtenerDetallesDePeliculas(movies, genero);
-                actualizarGeneros(movies);
+                obtenerDetallesDePeliculas(movies);
+                botoncargar.style.display = 'none';
             } else {
                 moviesContainer.innerHTML = '<p>No se encontraron películas</p>';
             }
@@ -36,9 +58,38 @@ function buscarPeliculas(titulo = '', genero = '') {
     xhr.onerror = () => console.error('Conexión fallida');
     xhr.send();
 }
+// Función para buscar películas por género
+function buscarPorGenero(genero = '') {
+    if (!genero) return;
+    botoncargar.style.display = 'block';
 
-function obtenerDetallesDePeliculas(movies, genero) {
-    moviesContainer.innerHTML = '';
+    const url = `https://www.omdbapi.com/?apikey=${apiKey}&s=${encodeURIComponent(genero)}&type=movie&page=${currentPage}`;
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.onload = () => {
+        if (xhr.status === 200) {
+            const respuesta = JSON.parse(xhr.responseText);
+            if (respuesta.Response === 'True') {
+                let movies = respuesta.Search;
+                obtenerDetallesDePeliculas(movies);
+            } else {
+                moviesContainer.innerHTML = '<p>No se encontraron películas para este género</p>';
+            }
+        } else {
+            console.error('Error al buscar películas');
+        }
+    };
+    xhr.onerror = () => console.error('Conexión fallida');
+    xhr.send();
+}
+// Función para obtener detalles de cada película y mostrarlas
+function obtenerDetallesDePeliculas(movies) {
+    if (currentPage === 1) {
+        moviesContainer.innerHTML = '';
+    }
+
+    // Mostrar las películas
     movies.forEach(movie => {
         const detallesUrl = `https://www.omdbapi.com/?apikey=${apiKey}&i=${movie.imdbID}`;
         const xhr = new XMLHttpRequest();
@@ -47,9 +98,7 @@ function obtenerDetallesDePeliculas(movies, genero) {
             if (xhr.status === 200) {
                 const movieDetalles = JSON.parse(xhr.responseText);
                 if (movieDetalles.Response === 'True') {
-                    if (!genero || movieDetalles.Genre?.toLowerCase().includes(genero)) {
-                        mostrarPelicula(movieDetalles);
-                    }
+                    mostrarPelicula(movieDetalles);
                 }
             }
         };
@@ -57,7 +106,7 @@ function obtenerDetallesDePeliculas(movies, genero) {
         xhr.send();
     });
 }
-
+// Función para mostrar las tarjetas de las películas
 function mostrarPelicula(movie) {
     const movieCard = document.createElement('div');
     movieCard.className = 'movieCard';
@@ -74,20 +123,6 @@ function mostrarPelicula(movie) {
                 <p><strong>Duración:</strong> ${movie.Runtime || 'Desconocido'}</p>
             </div>
         </div>
-        `
+    `;
     moviesContainer.appendChild(movieCard);
-}
-
-function actualizarGeneros(movies) {
-    const genres = new Set();
-    movies.forEach(movie => movie.Genre?.split(', ').forEach(g => genres.add(g.toLowerCase())));
-
-    const selectedGenre = genreFilter.value;
-    Array.from(genres).sort().forEach(g => {
-        const option = document.createElement('option');
-        option.value = g;
-        option.textContent = g.charAt(0).toUpperCase() + g.slice(1);
-        genreFilter.appendChild(option);
-    });
-    genreFilter.value = selectedGenre;
 }

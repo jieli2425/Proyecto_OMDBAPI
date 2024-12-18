@@ -7,34 +7,34 @@
     <link rel="stylesheet" href="./css/sytle.css">
 </head>
 <body>
-
-
-    <h1>Buscar películas</h1>
+    <header>
+        <h1>Películas</h1>
+    </header>
     <div class="nav">
         <input type="text" id="movieTitle" placeholder="Ingresa el título de la película">
-        <button id="searchButton">Buscar</button>
+        <button id="botonBuscar">Buscar</button>
         <button id="clearButton">Borrar</button>
     </div>
 
     <div id="filtros">
         <label for="generoFilter">Género:</label>
         <select id="generoFilter">
-            <option value="action">Acción</option>
-            <option value="comedy">Comedia</option>
-            <option value="drama">Drama</option>
-            <option value="adventure">Aventura</option>
-            <option value="romance">Romantica</option>
-            <option value="animation">Animación</option>
-            <option value="sci-fi">Ciencia ficción</option>
-            <option value="crime">Crimen</option>
-            <option value="fantasy">Fantasia</option>
-            <option value="sport">Deporte</option>
-            <option value="documentary">Documental</option>
-            <option value="war">Bélico</option>
-            <option value="western">Wertern</option>        
+            <option value="">Seleciona genero</option>
+            <option value="Action">Acción</option>
+            <option value="Comedy">Comedia</option>
+            <option value="Drama">Drama</option>
+            <option value="Adventure">Aventura</option>
+            <option value="Romance">Romantica</option>
+            <option value="Animation">Animación</option>
+            <option value="Sci-fi">Ciencia ficción</option>
+            <option value="Crime">Crimen</option>
+            <option value="Fantasy">Fantasia</option>
+            <option value="Western">Wertern</option>    
         </select>
-        <button id="applyFilterButton">Aplicar Filtros</button>
+        <button class="filtrar" id="filtrar">Filtrar</button>
     </div>
+
+    <button class="filtrar" id="botoncargar" style="display:none;">Cargar más</button>
 
     <div id="moviesContainer"></div>
 
