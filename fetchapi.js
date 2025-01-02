@@ -1,5 +1,5 @@
 const apiKey = 'a834ae02';
-let pagePrincipal = 1;
+let pagPrincipal = 1;
 let titPrincipal = '';
 
 const botonBuscar = document.getElementById('botonBuscar');
@@ -11,13 +11,13 @@ const genreFilter = document.getElementById('generoFilter');
 const moviesContainer = document.getElementById('moviesContainer');
 
 botonBuscar.addEventListener('click', () => {
-    pagePrincipal = 1;
+    pagPrincipal = 1;
     titPrincipal = peliBuscado.value;
     buscarPeliculas(titPrincipal);
 });
 
 filtrar.addEventListener('click', () => {
-    pagePrincipal = 1;
+    pagPrincipal = 1;
     titPrincipal = '';
     buscarPorGenero(genreFilter.value);
 });
@@ -31,7 +31,7 @@ clearButton.addEventListener('click', () => {
 });
 
 botoncargar.addEventListener('click', () => {
-    pagePrincipal++;
+    pagPrincipal++;
     if (titPrincipal) {
         buscarPeliculas(titPrincipal);
     } else {
@@ -40,80 +40,68 @@ botoncargar.addEventListener('click', () => {
 });
 
 // Función para buscar películas por título
-function buscarPeliculas(titulo = '') {
+async function buscarPeliculas(titulo = '') {
     let url = `https://www.omdbapi.com/?apikey=${apiKey}&type=movie`;
 
     if (titulo) {
-        url += `&s=${encodeURIComponent(titulo)}&page=${pagePrincipal}`;
+        url += `&s=${encodeURIComponent(titulo)}&page=${pagPrincipal}`;
     }
 
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
-    xhr.onload = () => {
-        if (xhr.status === 200) {
-            const respuesta = JSON.parse(xhr.responseText);
-            if (respuesta.Response === 'True') {
-                let movies = respuesta.Search;
-                obtenerDetallesDePeliculas(movies);
-                botoncargar.style.display = 'block';
-            } else {
-                moviesContainer.innerHTML = '<p>No se encontraron películas</p>';
-            }
+    try {
+        const response = await fetch(url);
+        const respuesta = await response.json();
+        if (respuesta.Response === 'True') {
+            let movies = respuesta.Search;
+            await obtenerDetallesDePeliculas(movies);
+            botoncargar.style.display = 'block';
         } else {
-            console.error('Error al buscar películas');
+            moviesContainer.innerHTML = '<p>No se encontraron películas</p>';
         }
-    };
-    xhr.onerror = () => console.error('Conexión fallida');
-    xhr.send();
+    } catch (error) {
+        console.error('Error al buscar películas', error);
+    }
 }
+
 // Función para buscar películas por género
-function buscarPorGenero(genero = '') {
+async function buscarPorGenero(genero = '') {
     if (!genero) return;
     botoncargar.style.display = 'block';
 
-    const url = `https://www.omdbapi.com/?apikey=${apiKey}&s=${encodeURIComponent(genero)}&type=movie&page=${pagePrincipal}`;
+    const url = `https://www.omdbapi.com/?apikey=${apiKey}&s=${encodeURIComponent(genero)}&type=movie&page=${pagPrincipal}`;
 
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
-    xhr.onload = () => {
-        if (xhr.status === 200) {
-            const respuesta = JSON.parse(xhr.responseText);
-            if (respuesta.Response === 'True') {
-                let movies = respuesta.Search;
-                obtenerDetallesDePeliculas(movies);
-            } else {
-                moviesContainer.innerHTML = '<p>No se encontraron películas para este género</p>';
-            }
+    try {
+        const response = await fetch(url);
+        const respuesta = await response.json();
+        if (respuesta.Response === 'True') {
+            let movies = respuesta.Search;
+            await obtenerDetallesDePeliculas(movies);
         } else {
-            console.error('Error al buscar películas');
+            moviesContainer.innerHTML = '<p>No se encontraron películas para este género</p>';
         }
-    };
-    xhr.onerror = () => console.error('Conexión fallida');
-    xhr.send();
+    } catch (error) {
+        console.error('Error al buscar películas', error);
+    }
 }
+
 // Función para obtener detalles de cada película y mostrarlas
-function obtenerDetallesDePeliculas(movies) {
-    if (pagePrincipal === 1) {
+async function obtenerDetallesDePeliculas(movies) {
+    if (pagPrincipal === 1) {
         moviesContainer.innerHTML = '';
     }
 
-    // Mostrar las películas
-    movies.forEach(movie => {
+    const detallesPromises = movies.map(movie => {
         const detallesUrl = `https://www.omdbapi.com/?apikey=${apiKey}&i=${movie.imdbID}`;
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', detallesUrl, true);
-        xhr.onload = () => {
-            if (xhr.status === 200) {
-                const movieDetalles = JSON.parse(xhr.responseText);
-                if (movieDetalles.Response === 'True') {
-                    mostrarPelicula(movieDetalles);
-                }
-            }
-        };
-        xhr.onerror = () => console.error('Error al obtener detalles de la película');
-        xhr.send();
+        return fetch(detallesUrl).then(response => response.json());
     });
+
+    try {
+        const raceResult = await Promise.race(detallesPromises);
+        mostrarPelicula(raceResult);
+    } catch (error) {
+        console.error('Error al obtener detalles de las películas', error);
+    }
 }
+
 // Función para mostrar las tarjetas de las películas
 function mostrarPelicula(movie) {
     const movieCard = document.createElement('div');
