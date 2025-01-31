@@ -1,7 +1,7 @@
 // Conexión con el servidor de WebSocket
 const socket = io();
 
-// Variables globales para la paginación y búsqueda actual
+// Variables globales
 let pagePrincipal = 1;
 let titPrincipal = '';
 
@@ -17,7 +17,7 @@ const moviesContainer = document.getElementById('moviesContainer');
 // Evento: Buscar películas por título
 botonBuscar.addEventListener('click', () => {
     pagePrincipal = 1;
-    titPrincipal = peliBuscado.value;
+    titPrincipal = peliBuscado.value.trim();
     buscarPeliculas(titPrincipal);
 });
 
@@ -25,7 +25,12 @@ botonBuscar.addEventListener('click', () => {
 filtrar.addEventListener('click', () => {
     pagePrincipal = 1;
     titPrincipal = '';
-    buscarPorGenero(genreFilter.value);
+    let generoSeleccionado = genreFilter.value.trim();
+    if (!generoSeleccionado) {
+        alert('Por favor, selecciona un género.');
+        return;
+    }
+    buscarPorGenero(generoSeleccionado);
 });
 
 // Evento: Limpiar resultados
@@ -37,31 +42,27 @@ clearButton.addEventListener('click', () => {
     titPrincipal = '';
 });
 
-// Evento: Cargar más resultados
 botoncargar.addEventListener('click', () => {
     pagePrincipal++;
     if (titPrincipal) {
         buscarPeliculas(titPrincipal);
     } else {
-        buscarPorGenero(genreFilter.value);
+        buscarPorGenero(genreFilter.value.trim());
     }
 });
 
-// Función para buscar películas por título
 function buscarPeliculas(titulo) {
     if (!titulo) return alert('Por favor, introduce un título.');
     socket.emit('buscarPeliculas', { titulo, page: pagePrincipal });
 }
 
-// Función para buscar películas por género
 function buscarPorGenero(genero) {
-    if (!genero) return alert('Por favor, selecciona un género.');
+    console.log(`Buscando películas por género: ${genero}`);
     socket.emit('buscarPorGenero', { genero, page: pagePrincipal });
 }
 
-// Escuchar respuesta del servidor con las películas encontradas
 socket.on('peliculasEncontradas', (movies) => {
-    if (pagePrincipal === 1) moviesContainer.innerHTML = ''; // Limpia los resultados si es la primera página
+    if (pagePrincipal === 1) moviesContainer.innerHTML = '';
 
     if (movies.length > 0) {
         movies.forEach((movie) => mostrarPelicula(movie));
@@ -76,13 +77,11 @@ socket.on('peliculasEncontradas', (movies) => {
     }
 });
 
-// Escuchar errores de búsqueda del servidor
 socket.on('errorBusqueda', (mensaje) => {
     alert(mensaje);
     botoncargar.style.display = 'none';
 });
 
-// Función para mostrar las tarjetas de las películas
 function mostrarPelicula(movie) {
     const movieCard = document.createElement('div');
     movieCard.className = 'movieCard';

@@ -66,7 +66,7 @@ function buscarPeliculas(titulo = '') {
     xhr.onerror = () => console.error('Conexión fallida');
     xhr.send();
 }
-// Función para buscar películas por género
+
 function buscarPorGenero(genero = '') {
     if (!genero) return;
     botoncargar.style.display = 'block';
@@ -91,13 +91,12 @@ function buscarPorGenero(genero = '') {
     xhr.onerror = () => console.error('Conexión fallida');
     xhr.send();
 }
-// Función para obtener detalles de cada película y mostrarlas
+
 function obtenerDetallesDePeliculas(movies) {
     if (pagePrincipal === 1) {
         moviesContainer.innerHTML = '';
     }
 
-    // Mostrar las películas
     movies.forEach(movie => {
         const detallesUrl = `https://www.omdbapi.com/?apikey=${apiKey}&i=${movie.imdbID}`;
         const xhr = new XMLHttpRequest();
@@ -114,7 +113,7 @@ function obtenerDetallesDePeliculas(movies) {
         xhr.send();
     });
 }
-// Función para mostrar las tarjetas de las películas
+
 function mostrarPelicula(movie) {
     const movieCard = document.createElement('div');
     movieCard.className = 'movieCard';
