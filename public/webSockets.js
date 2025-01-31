@@ -1,103 +1,114 @@
-// Conexión con el servidor de WebSocket
-const socket = io();
-
-// Variables globales
-let pagePrincipal = 1;
-let titPrincipal = '';
-
-// Elementos del DOM
-const botonBuscar = document.getElementById('botonBuscar');
-const filtrar = document.getElementById('filtrar');
-const clearButton = document.getElementById('clearButton');
-const botoncargar = document.getElementById('botoncargar');
-const peliBuscado = document.getElementById('movieTitle');
-const genreFilter = document.getElementById('generoFilter');
-const moviesContainer = document.getElementById('moviesContainer');
-
-// Evento: Buscar películas por título
-botonBuscar.addEventListener('click', () => {
-    pagePrincipal = 1;
-    titPrincipal = peliBuscado.value.trim();
-    buscarPeliculas(titPrincipal);
-});
-
-// Evento: Filtrar por género
-filtrar.addEventListener('click', () => {
-    pagePrincipal = 1;
-    titPrincipal = '';
-    let generoSeleccionado = genreFilter.value.trim();
-    if (!generoSeleccionado) {
-        alert('Por favor, selecciona un género.');
-        return;
+class AppBusqueda {
+    constructor() {
+        this.paginaPrincipal = 1;
+        this.tituloPrincipal = '';
+        this.socket = io();
+        this.Elementos();
+        this.Funciones();
     }
-    buscarPorGenero(generoSeleccionado);
-});
 
-// Evento: Limpiar resultados
-clearButton.addEventListener('click', () => {
-    peliBuscado.value = '';
-    genreFilter.value = '';
-    moviesContainer.innerHTML = '';
-    botoncargar.style.display = 'none';
-    titPrincipal = '';
-});
-
-botoncargar.addEventListener('click', () => {
-    pagePrincipal++;
-    if (titPrincipal) {
-        buscarPeliculas(titPrincipal);
-    } else {
-        buscarPorGenero(genreFilter.value.trim());
+    Elementos() {
+        this.botonBuscar = document.getElementById('botonBuscar');
+        this.filtrar = document.getElementById('filtrar');
+        this.botonLimpiar = document.getElementById('clearButton');
+        this.botonCargar = document.getElementById('botoncargar');
+        this.inputPeliculaBuscada = document.getElementById('movieTitle');
+        this.filtroGenero = document.getElementById('generoFilter');
+        this.contenedorPeliculas = document.getElementById('moviesContainer');
     }
-});
 
-function buscarPeliculas(titulo) {
-    if (!titulo) return alert('Por favor, introduce un título.');
-    socket.emit('buscarPeliculas', { titulo, page: pagePrincipal });
-}
+    Funciones() {
+        this.botonBuscar.addEventListener('click', () => {
+            this.paginaPrincipal = 1;
+            this.tituloPrincipal = this.inputPeliculaBuscada.value.trim();
+            this.buscarPeliculas();
+        });
 
-function buscarPorGenero(genero) {
-    console.log(`Buscando películas por género: ${genero}`);
-    socket.emit('buscarPorGenero', { genero, page: pagePrincipal });
-}
+        this.filtrar.addEventListener('click', () => {
+            this.paginaPrincipal = 1;
+            this.tituloPrincipal = '';
+            let generoSeleccionado = this.filtroGenero.value.trim();
+            if (!generoSeleccionado) {
+                alert('Por favor, selecciona un género.');
+                return;
+            }
+            this.buscarPorGenero(generoSeleccionado);
+        });
 
-socket.on('peliculasEncontradas', (movies) => {
-    if (pagePrincipal === 1) moviesContainer.innerHTML = '';
+        this.botonLimpiar.addEventListener('click', () => {
+            this.inputPeliculaBuscada.value = '';
+            this.filtroGenero.value = '';
+            this.contenedorPeliculas.innerHTML = '';
+            this.botonCargar.style.display = 'none';
+            this.tituloPrincipal = '';
+        });
 
-    if (movies.length > 0) {
-        movies.forEach((movie) => mostrarPelicula(movie));
-        botoncargar.style.display = 'block';
-    } else {
-        if (pagePrincipal === 1) {
-            moviesContainer.innerHTML = '<p>No se encontraron películas.</p>';
+        this.botonCargar.addEventListener('click', () => {
+            this.paginaPrincipal++;
+            if (this.tituloPrincipal) {
+                this.buscarPeliculas();
+            } else {
+                this.buscarPorGenero(this.filtroGenero.value.trim());
+            }
+        });
+    }
+
+    buscarPeliculas() {
+        if (!this.tituloPrincipal) return alert('Por favor, introduce un título.');
+        this.socket.emit('buscarPeliculas', { titulo: this.tituloPrincipal, pagina: this.paginaPrincipal });
+    }
+
+    buscarPorGenero(genero) {
+        console.log(`Buscando películas por género: ${genero}`);
+        this.socket.emit('buscarPorGenero', { genero, pagina: this.paginaPrincipal });
+    }
+
+    mostrarPelicula(pelicula) {
+        const tarjetaPelicula = document.createElement('div');
+        tarjetaPelicula.className = 'movieCard';
+        tarjetaPelicula.innerHTML = `
+            <div class="card">
+                <div class="cartafrontera">
+                    <img src="${pelicula.Poster !== 'N/A' ? pelicula.Poster : './images/no-photo.jpg'}" alt="${pelicula.Title}">
+                    <p>${pelicula.Title}</p>
+                </div>
+                <div class="cartatrasera">
+                    <p><strong>Año:</strong> ${pelicula.Year || 'Desconocido'}</p>
+                    <p><strong>Director:</strong> ${pelicula.Director || 'Desconocido'}</p>
+                    <p><strong>Género:</strong> ${pelicula.Genre || 'Desconocido'}</p>
+                    <p><strong>Duración:</strong> ${pelicula.Runtime || 'Desconocido'}</p>
+                </div>
+            </div>
+        `;
+        this.contenedorPeliculas.appendChild(tarjetaPelicula);
+    }
+
+    mostrarPeliculas(peliculas) {
+        if (this.paginaPrincipal === 1) this.contenedorPeliculas.innerHTML = '';
+
+        if (peliculas.length > 0) {
+            peliculas.forEach((pelicula) => this.mostrarPelicula(pelicula));
+            this.botonCargar.style.display = 'block';
         } else {
-            alert('No hay más resultados.');
-            botoncargar.style.display = 'none';
+            if (this.paginaPrincipal === 1) {
+                this.contenedorPeliculas.innerHTML = '<p>No se encontraron películas.</p>';
+            } else {
+                alert('No hay más resultados.');
+                this.botonCargar.style.display = 'none';
+            }
         }
     }
-});
 
-socket.on('errorBusqueda', (mensaje) => {
-    alert(mensaje);
-    botoncargar.style.display = 'none';
-});
+    manejarError(mensaje) {
+        alert(mensaje);
+        this.botonCargar.style.display = 'none';
+    }
 
-function mostrarPelicula(movie) {
-    const movieCard = document.createElement('div');
-    movieCard.className = 'movieCard';
-    movieCard.innerHTML = `
-        <div class="card">
-            <div class="cartafrontera">
-                <img src="${movie.Poster !== 'N/A' ? movie.Poster : './images/no-photo.jpg'}" alt="${movie.Title}">
-                <p>${movie.Title}</p>
-            </div>
-            <div class="cartatrasera">
-                <p><strong>Año:</strong> ${movie.Year || 'Desconocido'}</p>
-                <p><strong>Director:</strong> ${movie.Director || 'Desconocido'}</p>
-                <p><strong>Género:</strong> ${movie.Genre || 'Desconocido'}</p>
-                <p><strong>Duración:</strong> ${movie.Runtime || 'Desconocido'}</p>
-            </div>
-        </div>
-    `;
-    moviesContainer.appendChild(movieCard);
+    ConexionSocket() {
+        this.socket.on('peliculasEncontradas', (peliculas) => this.mostrarPeliculas(peliculas));
+        this.socket.on('errorBusqueda', (mensaje) => this.manejarError(mensaje));
+    }
 }
+
+const appBusqueda = new AppBusqueda();
+appBusqueda.ConexionSocket();
