@@ -39,7 +39,7 @@ botoncargar.addEventListener('click', () => {
     }
 });
 
-// Función para buscar películas por título
+
 async function buscarPeliculas(titulo = '') {
     let url = `https://www.omdbapi.com/?apikey=${apiKey}&type=movie`;
 
@@ -62,7 +62,7 @@ async function buscarPeliculas(titulo = '') {
     }
 }
 
-// Función para buscar películas por género
+
 async function buscarPorGenero(genero = '') {
     if (!genero) return;
     botoncargar.style.display = 'block';
@@ -83,7 +83,7 @@ async function buscarPorGenero(genero = '') {
     }
 }
 
-// Función para obtener detalles de cada película y mostrarlas
+
 async function obtenerDetallesDePeliculas(movies) {
     if (pagPrincipal === 1) {
         moviesContainer.innerHTML = '';
@@ -102,7 +102,7 @@ async function obtenerDetallesDePeliculas(movies) {
     }
 }
 
-// Función para mostrar las tarjetas de las películas
+
 function mostrarPelicula(movie) {
     const movieCard = document.createElement('div');
     movieCard.className = 'movieCard';

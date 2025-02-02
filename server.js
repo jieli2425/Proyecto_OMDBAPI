@@ -37,29 +37,29 @@ class AppPelis {
         });
     }
 
-    async buscarPeliculas(socket, titulo, pagina) {
-        console.log(`Buscando películas con título: "${titulo}", página: ${pagina}`);
-        try {
-            const url = `https://www.omdbapi.com/?apikey=${this.apiKey}&type=movie&s=${encodeURIComponent(titulo)}&page=${pagina}`;
-            const respuesta = await axios.get(url);
+        async buscarPeliculas(socket, titulo, pagina) {
+            console.log(`Buscando películas con título: "${titulo}", página: ${pagina}`);
+            try {
+                const url = `https://www.omdbapi.com/?apikey=${this.apiKey}&type=movie&s=${encodeURIComponent(titulo)}&page=${pagina}`;
+                const respuesta = await axios.get(url);
 
-            if (respuesta.data.Response === 'True' && respuesta.data.Search) {
-                const peliculas = await Promise.all(
-                    respuesta.data.Search.map(async (pelicula) => {
-                        const urlDetalles = `https://www.omdbapi.com/?apikey=${this.apiKey}&i=${pelicula.imdbID}`;
-                        const Detalles = await axios.get(urlDetalles);
-                        return Detalles.data;
-                    })
-                );
-                socket.emit('peliculasEncontradas', peliculas);
-            } else {
-                socket.emit('errorBusqueda', respuesta.data.Error || 'No se encontraron películas.');
+                if (respuesta.data.Response === 'True' && respuesta.data.Search) {
+                    const peliculas = await Promise.all(
+                        respuesta.data.Search.map(async (pelicula) => {
+                            const urlDetalles = `https://www.omdbapi.com/?apikey=${this.apiKey}&i=${pelicula.imdbID}`;
+                            const Detalles = await axios.get(urlDetalles);
+                            return Detalles.data;
+                        })
+                    );
+                    socket.emit('peliculasEncontradas', peliculas);
+                } else {
+                    socket.emit('errorBusqueda', respuesta.data.Error || 'No se encontraron películas.');
+                }
+            } catch (error) {
+                console.error('Error al buscar películas:', error.message);
+                socket.emit('errorBusqueda', 'Error al buscar películas en el servidor.');
             }
-        } catch (error) {
-            console.error('Error al buscar películas:', error.message);
-            socket.emit('errorBusqueda', 'Error al buscar películas en el servidor.');
         }
-    }
 
     async buscarPorGenero(socket, genero, pagina) {
         console.log(`Buscando películas por género: "${genero}", página: ${pagina}`);

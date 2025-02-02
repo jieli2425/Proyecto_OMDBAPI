@@ -39,7 +39,7 @@ botoncargar.addEventListener('click', () => {
     }
 });
 
-// Función para buscar películas por título
+
 function buscarPeliculas(titulo = '') {
     let url = `https://www.omdbapi.com/?apikey=${apiKey}&type=movie`;
 
